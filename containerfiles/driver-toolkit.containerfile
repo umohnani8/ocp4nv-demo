@@ -5,64 +5,6 @@ FROM registry.access.redhat.com/ubi10:latest AS builder
 ARG KERNEL_VERSION="211.4.el10nv"
 ARG KERNEL_URL="https://kojihub.stream.centos.org/kojifiles/vol/koji02/packages/kernel/6.12.0"
 
-RUN cat <<EOF > /etc/yum.repos.d/rhcos.repo
-
-[rhel-9-appstream]
-name=rhel-9-appstream
-baseurl=https://rhsm-pulp.corp.redhat.com/content/dist/rhel9/9.0/aarch64/appstream/os/
-enabled=1
-# Temporarily disable RPM signature
-# See: https://github.com/coreos/rhel-coreos-config/issues/146
-gpgcheck=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-
-[rhel-10.1-baseos]
-name=rhel-10.1-baseos
-baseurl=https://rhsm-pulp.corp.redhat.com/content/dist/rhel10/10.1/aarch64/baseos/os/
-enabled=1
-# Temporarily disable RPM signature
-# See: https://github.com/coreos/rhel-coreos-config/issues/146
-gpgcheck=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-
-[rhel-10.1-appstream]
-name=rhel-10.1-appstream
-baseurl=https://rhsm-pulp.corp.redhat.com/content/dist/rhel10/10.1/aarch64/appstream/os/
-enabled=1
-# Temporarily disable RPM signature
-# See: https://github.com/coreos/rhel-coreos-config/issues/146
-gpgcheck=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-
-[rhel-10.1-nfv]
-name=rhel-10.1-nfv
-baseurl=https://rhsm-pulp.corp.redhat.com/content/dist/rhel10/10.1/aarch64/nfv/os/
-enabled=1
-# Temporarily disable RPM signature
-# See: https://github.com/coreos/rhel-coreos-config/issues/146
-gpgcheck=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-
-[rhel-10.1-highavailability]
-name=rhel-10.1-highavailability
-baseurl=https://rhsm-pulp.corp.redhat.com/content/dist/rhel10/10.1/aarch64/highavailability/os/
-enabled=1
-# Temporarily disable RPM signature
-# See: https://github.com/coreos/rhel-coreos-config/issues/146
-gpgcheck=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-
-[rhel-10.1-fast-datapath]
-name=rhel-10.1-fast-datapath
-# NOTE this one is still using GA content
-baseurl=https://rhsm-pulp.corp.redhat.com/content/dist/layered/rhel10/aarch64/fast-datapath/os/
-enabled=1
-# Temporarily disable RPM signature
-# See: https://github.com/coreos/rhel-coreos-config/issues/146
-gpgcheck=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-EOF
-
 RUN set -eux; \
     arch="$(uname -m)"; \
     if [ "$arch" = "x86_64" ] || [ "$arch" = "aarch64" ]; then \

@@ -2,8 +2,15 @@
 
 Using a tool like **Podman** or **Buildah**, build your custom OS and DTK images from the provided containerfiles.
 
-Because this is an **out-of-cluster build**, make sure to authenticate with your registry using your **pull secret**.
+Because this is an **out-of-cluster build**, you must:
 
-Push the resulting image to your **private Quay repository**.
+- Authenticate with your registry using your **pull secret**
+- Run the build on a **RHEL/Fedora system registered with subscription-manager**
+- Build the **DTK image on an aarch64 host** (native ARM64 environment)
 
-These containerfiles are adapted from [https://github.com/Okoyl/rhcos-nv](https://github.com/Okoyl/rhcos-nv) to not require entitlements.
+When using Podman on a subscribed RHEL/Fedora host, Red Hat entitlements are automatically made available inside the build environment, allowing access to RHEL/UBI repositories during `dnf install`.
+
+For more details, see:
+https://access.redhat.com/solutions/253273
+
+After building, push the resulting image to your **private Quay repository**.
