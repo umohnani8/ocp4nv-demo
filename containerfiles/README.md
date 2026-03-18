@@ -1,7 +1,5 @@
 ## Build and Push the Custom Layered Image
 
-**Note, VPN access is required to build these containerfiles as they use internal Brew packages.**
-
 Using a tool like **Podman** or **Buildah**, build your custom OS and DTK images from the provided containerfiles.
 
 Because this is an **out-of-cluster build**, make sure to authenticate with your registry using your **pull secret**.

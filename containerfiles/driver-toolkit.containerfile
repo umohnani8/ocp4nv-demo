@@ -1,8 +1,9 @@
 # This is adapted from https://github.com/Okoyl/rhcos-nv/blob/master/driver-toolkit.containerfile
 
 FROM registry.access.redhat.com/ubi10:latest AS builder
-ARG KERNEL_VERSION="209.2.el10nv"
-RUN rm -Rf /etc/yum.repos.d/ubi.repo
+
+ARG KERNEL_VERSION="211.4.el10nv"
+ARG KERNEL_URL="https://kojihub.stream.centos.org/kojifiles/vol/koji02/packages/kernel/6.12.0"
 
 RUN cat <<EOF > /etc/yum.repos.d/rhcos.repo
 
@@ -65,8 +66,8 @@ EOF
 RUN set -eux; \
     arch="$(uname -m)"; \
     if [ "$arch" = "x86_64" ] || [ "$arch" = "aarch64" ]; then \
-        baseurl="https://download-01.beak-001.prod.iad2.dc.redhat.com/brewroot/vol/rhel-10/packages/kernel/6.12.0/${KERNEL_VERSION}/${arch}"; \
-        cd /tmp; \
+        baseurl="${KERNEL_URL}/${KERNEL_VERSION}/${arch}"; \
+        mkdir -p /tmp/new-kernel && cd /tmp/new-kernel; \
         curl -k "${baseurl}/" \
           | grep -oE 'kernel(-64k)?(-(core|modules|modules-core|modules-extra|rpm|srpm))?-[0-9][^"]+\.rpm' \
           | grep -vE '(modules-internal|modules-partner|debug|uki-virt)' \
@@ -74,8 +75,7 @@ RUN set -eux; \
           | xargs -r -I{} curl -f -k -O "${baseurl}/{}"; \
         ls -l /tmp; \
         echo "Installing new kernel packages..."; \
-        ls /tmp/kernel*.rpm; \
-        rpm -ivh --nodeps --noscripts /tmp/kernel-*.rpm; \
+        rpm -ivh --nodeps --noscripts /tmp/new-kernel/kernel-*.rpm; \
     fi
 
     # Additional packages that are mandatory for driver-containers
