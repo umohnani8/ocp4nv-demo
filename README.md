@@ -10,7 +10,11 @@ Before starting, ensure the following requirements are met:
 
 Create a YAML file to instruct the cluster to boot with the custom RHCOS4NV image.
 
-The official custom RHCOS4NV image is available at `quay.io/openshift-release-dev/ocp-v4.0-art-dev:4.21-10.1-ocp4nv-preview-202603161953-node-image`.
+**The official custom RHCOS4NV images are available at:**
+
+- `quay.io/openshift-release-dev/ocp-v4.0-art-dev:4.21-10.1-ocp4nv-preview-202603161953-node-image` (209.2.el10nv)
+- `quay.io/openshift-release-dev/ocp-v4.0-art-dev:4.21-10.1-ocp4nv-preview-202603182257-node-image` (211.4.el10nv)
+
 This is a manifest list and has support for both **aarch64** and **amd64**.
 
 
@@ -88,7 +92,10 @@ Use the following command to the build the image
 podman build -f driver-toolkit.containerfile --tag "driver-toolkit-cs:4.21.z"
 ```
 
-**There is an existing image that can be used for testing purposes at `quay.io/ravanelli/staging:dtk-4nv-03172026`.**
+**There are existing images that can be used for testing purposes:**
+
+- `quay.io/ravanelli/staging:dtk-4nv-03172026` (209.2.el10nv)
+- `quay.io/ravanelli/staging:dtk-4nv-03182026-211.4el0nv` (211.4.el10nv)
 
 ## Step 6: Add custom DTK tag to the DTK imagestream
 
