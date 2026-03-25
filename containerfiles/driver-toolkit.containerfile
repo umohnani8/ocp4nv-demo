@@ -11,7 +11,7 @@ RUN set -eux; \
         baseurl="${KERNEL_URL}/${KERNEL_VERSION}/${arch}"; \
         mkdir -p /tmp/new-kernel && cd /tmp/new-kernel; \
         curl -k "${baseurl}/" \
-          | grep -oE 'kernel(-64k)?(-(core|modules|modules-core|modules-extra|rpm|srpm))?-[0-9][^"]+\.rpm' \
+          | grep -oE 'kernel(-64k)?(-(core|modules|modules-core|modules-extra|rpm-macros|srpm-macros|headers|devel|devel-matched))?-[0-9][^"]+\.rpm' \
           | grep -vE '(modules-internal|modules-partner|debug|uki-virt)' \
           | sort -u \
           | xargs -r -I{} curl -f -k -O "${baseurl}/{}"; \
