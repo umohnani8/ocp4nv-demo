@@ -84,7 +84,15 @@ This confirms the deployment succeeded.
 
 A custom DTK image using the same kernel is needed to install the GPU operator.
 
-Build your own DTK image using this [containerfile](https://github.com/umohnani8/ocp4nv-demo/blob/main/containerfiles/driver-toolkit.containerfile). VPN access is required to build this.
+Build your own DTK image using this [containerfile](https://github.com/umohnani8/ocp4nv-demo/blob/main/containerfiles/driver-toolkit.containerfile).
+
+Note: Since this is an out-of-cluster build, you must:
+
+Authenticate to your registry using your pull secret
+Run the build on a RHEL or Fedora system registered with subscription-manager
+Build the DTK image on an aarch64 host (native ARM64 environment)
+
+If you are building in an environment with VPN access and prefer not to register the system for entitlements, you must configure the internal repositories instead. In that case, use this [containerfile](https://github.com/umohnani8/ocp4nv-demo/blob/main/containerfiles/driver-toolkit-vpn.containerfile).
 
 Use the following command to the build the image
 ```
