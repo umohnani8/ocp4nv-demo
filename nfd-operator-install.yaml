@@ -6,11 +6,11 @@ metadata:
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
-  name: nfd-operator-group
+  name: openshift-nfd
   namespace: openshift-nfd
 spec:
   targetNamespaces:
-  - openshift-nfd
+    - openshift-nfd
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -18,7 +18,8 @@ metadata:
   name: nfd
   namespace: openshift-nfd
 spec:
-  channel: stable
+  channel: "stable"
+  installPlanApproval: Automatic
   name: nfd
   source: redhat-operators
   sourceNamespace: openshift-marketplace

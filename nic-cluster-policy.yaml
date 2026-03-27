@@ -1,0 +1,40 @@
+apiVersion: mellanox.com/v1alpha1
+kind: NicClusterPolicy
+metadata:
+  name: nic-cluster-policy
+spec:
+  ofedDriver:
+    imagePullSecrets: []
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 30
+    forcePrecompiled: false
+    terminationGracePeriodSeconds: 300
+    repository: quay.io/redhat_emp1/ecosys-nvidia # Replace with the repository of the image you tagged and pushed
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 30
+    upgradePolicy:
+      autoUpgrade: true
+      drain:
+        deleteEmptyDir: true
+        enable: true
+        force: true
+        podSelector: ''
+        timeoutSeconds: 300
+      maxParallelUpgrades: 1
+      safeLoad: false
+    startupProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 20
+    version: doca3.3.0-26.01-1.0.0.0-0
+    image: doca-driver
+    env:
+    - name: UNLOAD_STORAGE_MODULES
+      value: "true"
+    - name: RESTORE_DRIVER_ON_POD_TERMINATION
+      value: "true"
+    - name: CREATE_IFNAMES_UDEV
+      value: "true"
+    - name: ENTRYPOINT_DEBUG
+      value: 'true'

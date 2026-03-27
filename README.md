@@ -27,7 +27,7 @@ metadata:
   name: 99-worker-custom-os
 spec:
   # The osImageURL is the key field here
-  osImageURL: quay.io/openshift-release-dev/ocp-v4.0-art-dev:4.21-10.1-ocp4nv-preview-202603161953-node-image
+  osImageURL: quay.io/openshift-release-dev/ocp-v4.0-art-dev:4.21-10.1-ocp4nv-preview-202603182257-node-image
 ```
 
 ## Step 2: Apply the MachineConfig
@@ -73,14 +73,14 @@ oc get nodes -o custom-columns=NAME:.metadata.name,KERNEL:.status.nodeInfo.kerne
 Confirm that the node reports the following kernel:
 
 ```
-6.12.0-209.2.el10nv.aarch64+64k
+6.12.0-211.4.el10nv.aarch64+64k
 ```
 
 This confirms the deployment succeeded.
 
 ---
 
-## Step 5: Building the DTK image
+## Step 5: Building the Driver ToolKit image
 
 A custom DTK image using the same kernel is needed to install the GPU operator.
 
@@ -107,9 +107,9 @@ podman build -f driver-toolkit.containerfile --tag "driver-toolkit-cs:4.21.z"
 
 ## Step 6: Add custom DTK tag to the DTK imagestream
 
-Add the custom tag to the driver-toolkit imagestream
+Add the custom tag to the driver-toolkit imagestream. The NVIDIA operators that we will install in future steps looks for a DTK image with a `10.1.x` tag.
 ```
-oc tag quay.io/ravanelli/staging:dtk-4nv-03172026 openshift/driver-toolkit:custom-dtk -n openshift
+oc tag quay.io/ravanelli/staging:dtk-4nv-03182026-211.4el0nv openshift/driver-toolkit:10.1.20260126-0 -n openshift
 ```
 
 Verify the tag was added
@@ -117,7 +117,7 @@ Verify the tag was added
 oc get is/driver-toolkit -n openshift -o yaml
 ```
 
-## Step 7: Install and uninstall the NFD operator
+## Step 7: Install the NFD operator
 
 **Detailed instructions on installing the NFD and GPU operators can be found [here](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/introduction.html).**
 
@@ -142,32 +142,43 @@ Wait a few seconds for the labels to be added to the nodes. It can be verified w
 oc get nodes --show-labels | grep feature.node
 ```
 
-Now let's remove the NFD instance and operator. **The labels will persist.**
+## Step 8: Install the NVIDIA Network Operator
+
+Note that as of this writing the v26.1 release of the NVIDIA Network Operator was not available for OpenShift 4.21 so v25.10 of the operator is being used here.
+
+Install the Network Operator.
 ```
-oc delete nodefeaturediscovery nfd-instance -n openshift-nfd
-oc delete subscription nfd -n openshift-nfd
-oc delete -n openshift-nfd $(oc get csv -n openshift-nfd -o name | grep nfd)
+oc apply -f network-operator-install.yaml
 ```
 
-## Step 8: Label node with custom DTK tag
-
-Label the GPU nodes with the custom DTK tag.
-
-List the GPU nodes.
+Wait for the pods to be ready.
 ```
-oc get nodes
+oc get pods -n nvidia-network-operator -w
 ```
 
-Add label to specify custom DTK tag (replace <GPU_NODE_NAME> with actual node name).
+Now that the operator is up and running we can go ahead and configure a basic driver policy. In order to match the kernel we have installed on this cluster, we have to do some tagging magic from NVIDIA's registry and then push it up to our own private registry. Need to tag from `rhel10.0` to `rhel10.1`.
 ```
-oc label node <GPU_NODE_NAME> \
-    nvidia.com/gpu.driver-toolkit-imagestream-tag=custom-dtk \
-    --overwrite
+podman tag nvcr.io/nvidia/mellanox/doca-driver:doca3.3.0-26.01-1.0.0.0-0-rhel10.0-arm64 quay.io/redhat_emp1/ecosys-nvidia/doca-driver:doca3.3.0-26.01-1.0.0.0-0-rhel10.1-arm64
+podman push quay.io/redhat_emp1/ecosys-nvidia/doca-driver:doca3.3.0-26.01-1.0.0.0-0-rhel10.1-arm64
 ```
 
-Verify the label was added.
+Now in the NicClusterPolicy we can specific the DOCA version and it will be able to find the right tag from our registry.
+
+Create the NicClusterPolicy.
 ```
-oc get node <GPU_NODE_NAME> --show-labels | grep driver-toolkit
+oc create -f nic-cluster-policy.yaml
+```
+
+Wait for the pods to be ready. The NicClusterPolicy will take ~5 minutes to complete as it builds the drivers and then ultimately unloads the in-tree mlx5 drivers and loads the out-of-tree drivers. After that time we should see mofed pods that are in a 2/2 ready state. The number of mofed pods will be based on the number of nodes that have valid Mellanox devices in them.
+```
+oc get pods -n nvidia-network-operator -w
+```
+
+Further validation can be done by execing into the mofed pod and running a few commands.
+```
+oc rsh -n nvidia-network-operator [mofed-pod-name]
+sh-5.2# lsmod|grep mlx5
+sh-5.2# ofed_info
 ```
 
 ## Step 9: Install the GPU operator
@@ -185,7 +196,7 @@ oc get pods -n nvidia-gpu-operator -w
 
 ## Step 10: Deploy ClusterPolicy that uses a custom image
 
-First update the [clusterPolicy YAML](https://github.com/umohnani8/ocp4nv-demo/blob/main/gpu-cluster-policy.yaml) with your custom image. 
+First update the [clusterPolicy YAML](https://github.com/umohnani8/ocp4nv-demo/blob/main/gpu-cluster-policy.yaml) with your custom driver image. 
 
 Create the clusterPolicy.
 ```
@@ -248,5 +259,5 @@ oc get nodes -o custom-columns=NAME:.metadata.name,KERNEL:.status.nodeInfo.kerne
 Confirm that the node reports the following kernel:
 
 ```
-6.12.0-209.2.el10nv.aarch64+64k
+6.12.0-211.4.el10nv.aarch64+64k
 ```

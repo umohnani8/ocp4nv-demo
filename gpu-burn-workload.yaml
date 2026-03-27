@@ -13,7 +13,7 @@ spec:
     kubernetes.io/hostname: <GPU_NODE_NAME> # Replace <GPU_NODE_NAME> with the name of the GPU node
   containers:
     - name: gpu-burn
-      image: quay.io/vemporop/gpu-burn:cuda12.3.0-ubi9-aarch64
+      image: quay.io/vemporop/gpu-burn:cuda12.3.0-ubi9-aarch64 # Replace with the desired image
       resources:
         requests:
           nvidia.com/gpu: 1
