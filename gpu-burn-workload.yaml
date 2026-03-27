@@ -27,6 +27,7 @@ spec:
             - ALL
         runAsNonRoot: true
         allowPrivilegeEscalation: false
+  restartPolicy: Never
   tolerations:
   - effect: NoSchedule
     key: feature.node.kubernetes.io/gpu-node
