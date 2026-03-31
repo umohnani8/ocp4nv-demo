@@ -59,9 +59,10 @@ spec:
     enabled: true
     useNvidiaDriverCRD: false
     # Replace the values below with your custom driver image
-    # repository: quay.io/redhat_emp1/ecosys-nvidia
-    # image: driver
-    # version: 580.126.09
+    repository: quay.io/umohnani8
+    image: driver
+    version: 580.126.09
+    imagePullPolicy: Always
   devicePlugin:
     config:
       name: ''

@@ -16,9 +16,9 @@ spec:
       image: quay.io/vemporop/gpu-burn:cuda12.3.0-ubi9-aarch64 # Replace with the desired image
       resources:
         requests:
-          nvidia.com/gpu: 1
+          nvidia.com/gpu: 4 # Replace with the desired number of GPUs
         limits:
-          nvidia.com/gpu: 1
+          nvidia.com/gpu: 4 # Replace with the desired number of GPUs
       securityContext:
         seccompProfile:
           type: RuntimeDefault

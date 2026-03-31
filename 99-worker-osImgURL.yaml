@@ -1,0 +1,9 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker # Target the pool with the NVIDIA nodes (using worker for the example here)
+  name: 99-worker-custom-os
+spec:
+  # The osImageURL is the key field here
+  osImageURL: quay.io/openshift-release-dev/ocp-v4.0-art-dev:4.21-10.1-ocp4nv-preview-202603182257-node-image

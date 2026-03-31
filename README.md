@@ -145,6 +145,7 @@ oc get nodes --show-labels | grep feature.node
 ## Step 8: Install the NVIDIA Network Operator
 
 Note that as of this writing the v26.1 release of the NVIDIA Network Operator was not available for OpenShift 4.21 so v25.10 of the operator is being used here.
+The Network operator only needs to be installed for Multi-node clusters.
 
 Install the Network Operator.
 ```
@@ -196,7 +197,9 @@ oc get pods -n nvidia-gpu-operator -w
 
 ## Step 10: Deploy ClusterPolicy that uses a custom image
 
-First update the [clusterPolicy YAML](https://github.com/umohnani8/ocp4nv-demo/blob/main/gpu-cluster-policy.yaml) with your custom driver image. 
+First update the [clusterPolicy YAML](https://github.com/umohnani8/ocp4nv-demo/blob/main/gpu-cluster-policy.yaml) with your custom driver image.
+
+For this demo, we are going to use `quay.io/umohnani8/driver:580.126.09-rhel10` as at the time of this writing we required a special build driver container from NVIDIA because the default one that came with v26.3 of the GPU Operator did not work. This image was pulled from `quay.io/tariq_ibrahim/driver:580.126.09-rhel9.6` and re-tagged to be discoverable for RHEL 10 by the GPU operator.
 
 Create the clusterPolicy.
 ```
@@ -216,17 +219,21 @@ oc apply -f gpu-burn-workload.yaml
 
 Monitor the gpu-burn pod
 ```
-oc logs -f gpu-burn
+oc logs -f gpu-burn -n gpu-burn
 ```
 
-Check GPU status inside the pod
+Check GPU status inside the pod (only works when the pod is running)
 ```
-oc exec -it gpu-burn -- nvidia-smi
+oc exec -it gpu-burn -n gpu-burn -- nvidia-smi
 ```
+
+End of Demo instructions!
 
 ---
 
 ## For Day 0 Support
+
+Follow these steps when you want to configure your GPU nodes to use the custom RHCOS4NV OS image prior to starting the OpenShift installation.
 
 Extract the *openshift-install* binary from a 4.21.z release payload.
 ```
@@ -238,9 +245,9 @@ Create the manifests.
 ./openshift-install create manifests
 ```
 
-Add the custom osImageURL MachineConfig YAML from **Step 1** above under the *openshift* directory created by the manifests step.
+Add the custom [osImageURL MachineConfig YAML](https://github.com/umohnani8/ocp4nv-demo/blob/main/99-worker-osImgURL.yaml) under the *openshift* directory created by the manifests step.
 ```
-touch openshift/99-worker-osImgURL.yaml
+cp 99-worker-osImgURL.yaml openshift/99-worker-osImgURL.yaml
 ```
 
 Create the cluster.
