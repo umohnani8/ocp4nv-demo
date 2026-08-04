@@ -1,3 +1,3 @@
-[submodule "vera-rubin-ocp-4.22"]
-	path = vera-rubin-ocp-4.22
+[submodule "vera-rubin-ocp"]
+	path = vera-rubin-ocp
 	url = git@github.com:ravanelli/nvidia-sno.git
